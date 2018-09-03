@@ -1,0 +1,52 @@
+{
+  "Attributes List": [
+    {
+      "uuid": "f04b36a3-9f4f-4f3b-9aef-742243527f49",
+      "name": "usePeriodUuid",
+      "display": "Use Period ID",
+      "description": "Unique identifier for Use Period"
+    },
+    {
+      "uuid": "b1fd1598-9edb-407a-8c1e-85ca2c910046",
+      "name": "patientUuid",
+      "display": "Patient ID",
+      "description": "Unique identifier for Patient"
+    },
+    {
+      "uuid": "54787976-7291-43ee-8ab8-81e392800ab6",
+      "name": "patientName",
+      "display": "Patient Name",
+      "description": "Name of Patient"
+    },
+    {
+      "uuid": "e7971935-2970-4067-ac37-0ec1fd6b3647",
+      "name": "androidDeviceUuid",
+      "display": "Android Device ID",
+      "description": "Unique identifier for Android Device"
+    },
+    {
+      "uuid": "a4f26c61-6486-4114-8791-a3a7f0842daa",
+      "name": "usePeriodStart",
+      "display": "Use Period Start",
+      "description": "Start date and time of Use Period"
+    },
+    {
+      "uuid": "12fe9e7f-ef90-4c61-b82f-0f061245bdfc",
+      "name": "usePeriodEnd",
+      "display": "Use Period End",
+      "description": "End date and time of Use Period"
+    },
+    {
+      "uuid": "c836e248-17ea-4525-8b3a-6ef3e6f97546",
+      "name": "usePeriodRange",
+      "display": "Use Period Range",
+      "description": "Date and time of start and end of use period"
+    },
+    {
+      "uuid": "204e6315-56d8-4e34-9883-1f78ec2e785c",
+      "name": "applicationMode",
+      "display": "Application Mode",
+      "description": "Mode of the Application: can be 'passive' or 'active'"
+    }
+  ]
+}

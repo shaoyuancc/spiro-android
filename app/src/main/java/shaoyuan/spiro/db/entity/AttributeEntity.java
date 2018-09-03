@@ -1,7 +1,13 @@
-package shaoyuan.spiro.db;
+package shaoyuan.spiro.db.entity;
+
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.ColumnInfo;
+
+import shaoyuan.spiro.model.Attribute;
 
 @Entity
-public class AttributeEntity {
+public class AttributeEntity implements Attribute{
     @PrimaryKey
     private String uuid;
 
