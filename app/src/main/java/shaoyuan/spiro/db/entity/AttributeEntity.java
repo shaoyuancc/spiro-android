@@ -3,12 +3,15 @@ package shaoyuan.spiro.db.entity;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.ColumnInfo;
+import android.support.annotation.NonNull;
 
 import shaoyuan.spiro.model.Attribute;
 
-@Entity
+@Entity (tableName = "attributes")
 public class AttributeEntity implements Attribute{
+
     @PrimaryKey
+    @NonNull
     private String uuid;
 
     @ColumnInfo(name = "name")
