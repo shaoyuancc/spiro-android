@@ -2,6 +2,7 @@ package shaoyuan.spiro.db;
 
 import shaoyuan.spiro.db.entity.AttributeEntity;
 import shaoyuan.spiro.AppUtil;
+import shaoyuan.spiro.db.entity.DatumEntity;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -23,11 +24,13 @@ public class DataGenerator {
 
         return attributes;
     }
-}
 
-class AttributeEntityList {
-    private List<AttributeEntity> list;
+    public static List<DatumEntity> generateData() {
+        String data = AppUtil.loadJSONFromAsset("raw/testdata.json");
+        Type type = new TypeToken<List<DatumEntity>>() {
+        }.getType();
+        List<DatumEntity> datumList = new Gson().fromJson(data, type);
 
-    public List<AttributeEntity> getList() { return list; }
-    public void setList(List<AttributeEntity> list) { this.list = list; }
+        return datumList;
+    }
 }

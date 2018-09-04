@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "value": 500,
+    "dateTime": "monday",
+    "usePeriodUuid": "A1"
+  },
+  {
+    "id": 2,
+    "value": 600,
+    "dateTime": "tuesday",
+    "usePeriodUuid": "A2"
+  }
+]

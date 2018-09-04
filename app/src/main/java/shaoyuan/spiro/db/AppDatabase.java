@@ -13,6 +13,8 @@ import android.support.annotation.VisibleForTesting;
 import shaoyuan.spiro.AppExecutors;
 import shaoyuan.spiro.db.dao.AttributeDao;
 import shaoyuan.spiro.db.entity.AttributeEntity;
+import shaoyuan.spiro.db.entity.DatumEntity;
+import shaoyuan.spiro.db.dao.DatumDao;
 
 import java.util.List;
 
@@ -25,6 +27,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public static final String DATABASE_NAME = "app-db";
 
     public abstract AttributeDao attributeDao();
+
+    public abstract DatumDao datumDao();
 
     private final MutableLiveData<Boolean> mIsDatabaseCreated = new MutableLiveData<>();
 
@@ -58,8 +62,8 @@ public abstract class AppDatabase extends RoomDatabase {
                             // Generate the data for pre-population
                             AppDatabase database = AppDatabase.getInstance(appContext, executors);
                             List<AttributeEntity> attributes = DataGenerator.generateAttributes();
-
-                            insertData(database, attributes);
+                            List<DatumEntity> data = DataGenerator.generateData();
+                            insertData(database, attributes, data);
                             // notify that the database was created and it's ready to be used
                             database.setDatabaseCreated();
                         });
@@ -81,9 +85,12 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     private static void insertData(final AppDatabase database,
-                                   final List<AttributeEntity> attributes) {
+                                   final List<AttributeEntity> attributes,
+                                   final List<DatumEntity> data
+                                   ) {
         database.runInTransaction(() -> {
             database.attributeDao().insertAttributes(attributes);
+            database.datumDao().insertData(data);
         });
     }
 

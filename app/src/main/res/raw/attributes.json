@@ -1,5 +1,4 @@
-{
-  "Attributes List": [
+[
     {
       "uuid": "f04b36a3-9f4f-4f3b-9aef-742243527f49",
       "name": "usePeriodUuid",
@@ -48,5 +47,4 @@
       "display": "Application Mode",
       "description": "Mode of the Application: can be 'passive' or 'active'"
     }
-  ]
-}
+]
