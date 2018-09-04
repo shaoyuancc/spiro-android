@@ -14,7 +14,6 @@ import java.util.List;
 
 @Dao
 public interface AttributeDao {
-
     @Insert
     void insertAttribute (AttributeEntity attribute);
 

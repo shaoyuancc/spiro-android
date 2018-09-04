@@ -1,6 +1,7 @@
 package shaoyuan.spiro.ui;
 
 import android.annotation.TargetApi;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -18,10 +19,15 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.util.Log;
 
 import java.util.List;
 
 import shaoyuan.spiro.R;
+import shaoyuan.spiro.db.AppDatabase;
+import shaoyuan.spiro.db.entity.DatumEntity;
+import shaoyuan.spiro.model.Datum;
+import shaoyuan.spiro.model.Attribute;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -35,6 +41,7 @@ import shaoyuan.spiro.R;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+    private AppDatabase appDatabase;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -122,6 +129,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        LiveData<DatumEntity> datum = appDatabase.datumDao().loadDatum(1L);
+               Log.d("SettingsActivity",datum.getValue().getDateTime());
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                LiveData<DatumEntity> datum = appDatabase.datumDao().loadDatum(1L);
+//                Log.d("SettingsActivity",datum.getValue().getDateTime());
+//            }
+//        }) .start();
     }
 
     /**

@@ -9,7 +9,6 @@ import shaoyuan.spiro.model.Attribute;
 
 @Entity (tableName = "attributes")
 public class AttributeEntity implements Attribute{
-
     @PrimaryKey
     @NonNull
     private String uuid;
