@@ -24,10 +24,6 @@ import android.util.Log;
 import java.util.List;
 
 import shaoyuan.spiro.R;
-import shaoyuan.spiro.db.AppDatabase;
-import shaoyuan.spiro.db.entity.DatumEntity;
-import shaoyuan.spiro.model.Datum;
-import shaoyuan.spiro.model.Attribute;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -41,7 +37,6 @@ import shaoyuan.spiro.model.Attribute;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
-    private AppDatabase appDatabase;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -129,16 +124,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        LiveData<DatumEntity> datum = appDatabase.datumDao().loadDatum(1L);
-               Log.d("SettingsActivity",datum.getValue().getDateTime());
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                LiveData<DatumEntity> datum = appDatabase.datumDao().loadDatum(1L);
-//                Log.d("SettingsActivity",datum.getValue().getDateTime());
-//            }
-//        }) .start();
     }
 
     /**
@@ -186,6 +171,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);

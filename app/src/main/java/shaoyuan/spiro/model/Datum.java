@@ -5,6 +5,7 @@ public interface Datum {
     Long getValue();
     String getDateTime();
     String getUsePeriodUuid();
+    void setId(Long id);
     void setValue(Long value);
     void setDateTime(String dateTime);
     void setUsePeriodUuid(String usePeriodUuid);
