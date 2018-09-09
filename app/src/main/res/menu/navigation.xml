@@ -9,6 +9,7 @@
     <item
         android:id="@+id/navigation_dashboard"
         android:icon="@drawable/ic_dashboard_black_24dp"
+        android:fragment="shaoyuan.spiro.ui.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/title_settings" />
 
 </menu>
