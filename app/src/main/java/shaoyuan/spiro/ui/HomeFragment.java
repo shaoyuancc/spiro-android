@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import shaoyuan.spiro.spf.MicrophoneSignalProcess;
+import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
 import shaoyuan.spiro.R;
@@ -67,14 +67,6 @@ public class HomeFragment extends Fragment {
                          Log.d("SPF-Lib","Peak Flow Rate: " + peakFlowRate);
                      }
                  });
-
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    Log.d("SPF-Lib", "got interrupted");
-//                }
-
-               // MicrophoneSignalProcess.getInstance().stopAnalyze();
             }
 
 
@@ -85,7 +77,7 @@ public class HomeFragment extends Fragment {
         return new View.OnClickListener() {
             public void onClick(View v) {
                     MicrophoneSignalProcess.getInstance().stopAnalyze();
-                    //MicrophoneSignalProcess.getInstance().close();
+                    MicrophoneSignalProcess.getInstance().close();
                 }
             };
     }
