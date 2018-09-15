@@ -8,28 +8,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
-import com.synthnet.spf.MicrophoneSignalProcess;
+import shaoyuan.spiro.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
 import shaoyuan.spiro.R;
 
 
 public class HomeFragment extends Fragment {
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.home_fragment, null);
 
+        final TextView readingView = v.findViewById(R.id.textView);
+        readingView.setText("hello");
+
         final Button calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
 
         final Button startMeasureButton = v.findViewById(R.id.startMeasureButton);
-        startMeasureButton.setOnClickListener(createStartButtonListener());
+        startMeasureButton.setOnClickListener(createStartButtonListener(readingView));
 
         final Button stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
+
+
 
         return v;
     }
@@ -47,16 +54,30 @@ public class HomeFragment extends Fragment {
         };
     }
 
-    private View.OnClickListener createStartButtonListener() {
+    private View.OnClickListener createStartButtonListener(TextView readingView) {
         return new View.OnClickListener() {
+
             public void onClick(View v) {
+                readingView.setText("Start Reading");
+
+
                 MicrophoneSignalProcess.getInstance().startAnalyze(new SignalProcess.OnPeakFound() {
-                    @Override
-                    public void onResult(int peakFlowRate) {
-                        Log.d("SPF-Lib","Peak Flow Rate: " + peakFlowRate);
-                    }
-                });
+                     @Override
+                     public void onResult(int peakFlowRate) {
+                         Log.d("SPF-Lib","Peak Flow Rate: " + peakFlowRate);
+                     }
+                 });
+
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e) {
+//                    Log.d("SPF-Lib", "got interrupted");
+//                }
+
+               // MicrophoneSignalProcess.getInstance().stopAnalyze();
             }
+
+
         };
     }
 
@@ -64,7 +85,7 @@ public class HomeFragment extends Fragment {
         return new View.OnClickListener() {
             public void onClick(View v) {
                     MicrophoneSignalProcess.getInstance().stopAnalyze();
-                    MicrophoneSignalProcess.getInstance().close();
+                    //MicrophoneSignalProcess.getInstance().close();
                 }
             };
     }
