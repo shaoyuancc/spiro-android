@@ -1,6 +1,8 @@
 package shaoyuan.spiro.feature;
 
+import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,6 +12,7 @@ import java.util.Date;
 
 import shaoyuan.spiro.db.entity.DatumEntity;
 import shaoyuan.spiro.model.Datum;
+import shaoyuan.spiro.ui.SettingsFragment;
 
 public  class DataOutput {
 
@@ -43,6 +46,8 @@ public  class DataOutput {
         Date date = new Date();
         return (dateFormat.format(date) + ".csv");
     }
+
+
 
     public static String createStringFromValue(int value) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");

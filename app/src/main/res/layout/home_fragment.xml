@@ -8,18 +8,19 @@
         android:id="@+id/lastRecordLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/startMeasureButton"
-        android:layout_alignTop="@+id/lastRecordLabelTextView"
-        android:text="Last Record" />
+        android:layout_centerInParent="true"
+        android:text="Last Record:"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
 
     <TextView
-        android:id="@+id/lastRecordLabelTextView"
+        android:id="@+id/lastRecordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/startTextView"
-        android:layout_marginTop="211dp"
-        android:text="NA" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="162dp"
+        android:text="NA"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
 
     <TextView
         android:id="@+id/stopTextView"
@@ -27,7 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/stopMeasureButton"
         android:layout_alignStart="@+id/startTextView"
-        android:text="Not Stopped"
         android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
     <Button
