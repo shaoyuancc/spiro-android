@@ -1,12 +1,13 @@
 package shaoyuan.spiro.model;
 
 public interface Datum {
-    Long getId();
-    Long getValue();
+    Integer getId();
+    Integer getValue();
     String getDateTime();
     String getUsePeriodUuid();
-    void setId(Long id);
-    void setValue(Long value);
+    String toString();
+    void setId(Integer id);
+    void setValue(Integer value);
     void setDateTime(String dateTime);
     void setUsePeriodUuid(String usePeriodUuid);
 }

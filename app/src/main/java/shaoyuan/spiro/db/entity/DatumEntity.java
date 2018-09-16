@@ -11,10 +11,10 @@ import shaoyuan.spiro.model.Datum;
 public class DatumEntity implements Datum {
     @PrimaryKey
     @NonNull
-    private Long id;
+    private Integer id;
 
     @ColumnInfo(name = "value")
-    private Long value;
+    private Integer value;
 
     @ColumnInfo(name = "dateTime")
     private String dateTime;
@@ -24,13 +24,21 @@ public class DatumEntity implements Datum {
 
     public DatumEntity() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getValue() { return value; }
-    public void setValue(Long value) { this.value = value; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public Integer getValue() { return value; }
+    public void setValue(Integer value) { this.value = value; }
     public String getDateTime() { return dateTime; }
     public void setDateTime(String dateTime) { this.dateTime = dateTime; }
     public String getUsePeriodUuid() { return usePeriodUuid; }
     public void setUsePeriodUuid(String usePeriodUuid) { this.usePeriodUuid = usePeriodUuid; }
+
+    public String toString() {
+        String deliminator = ",";
+        return getDateTime() + deliminator +
+                getId().toString() + deliminator +
+                getValue().toString() + deliminator +
+                getUsePeriodUuid();
+    }
 
 }
