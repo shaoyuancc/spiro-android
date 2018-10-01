@@ -3,6 +3,7 @@ package shaoyuan.spiro.feature;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,6 +25,8 @@ public  class DataOutput {
         }
         File file = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), filenameExternal);
+        Log.d("SPIRO-OUTPUT", "filepath: " + file.getAbsolutePath());
+        Log.d("SPIRO-OUTPUT", "Can Write: " + file.canWrite());
 
         FileOutputStream outputStream = null;
         try {

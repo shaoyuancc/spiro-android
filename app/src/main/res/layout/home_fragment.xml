@@ -4,76 +4,72 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/lastRecordLabelTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Last Record:"
-        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
-
-    <TextView
-        android:id="@+id/lastRecordTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="162dp"
-        android:text="NA"
-        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
-
-    <TextView
-        android:id="@+id/stopTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/stopMeasureButton"
-        android:layout_alignStart="@+id/startTextView"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
-
-    <Button
-        android:id="@+id/startMeasureButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/stopMeasureButton"
-        android:layout_marginTop="125dp"
-        android:text="Start Measure" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/stopMeasureButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="48dp"
-        android:layout_marginStart="29dp"
-        android:text="Stop Measure" />
+        <Button
+            android:id="@+id/calibrateButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="Calibrate" />
 
-    <Button
-        android:id="@+id/calibrateButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/startMeasureButton"
-        android:layout_marginTop="37dp"
-        android:text="Calibrate" />
+        <TextView
+            android:id="@+id/calibrateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="20px"
+            android:text="Not Calibrated" />
 
-    <TextView
-        android:id="@+id/startTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/startMeasureButton"
-        android:layout_alignStart="@+id/calibrateTextView"
-        android:text="Not Started"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        <Button
+            android:id="@+id/startMeasureButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="Start Measure" />
 
-    <TextView
-        android:id="@+id/calibrateTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/calibrateButton"
-        android:layout_marginEnd="53dp"
-        android:text="Not Calibrated"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        <TextView
+            android:id="@+id/startTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignStart="@+id/lastRecordLabelTextView"
+            android:text="Not Started" />
+
+        <TextView
+            android:id="@+id/lastRecordLabelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Last Record:" />
+
+        <TextView
+            android:id="@+id/lastRecordTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/lastRecordLabelTextView"
+            android:layout_marginBottom="20px"
+            android:text="NA" />
+
+        <Button
+            android:id="@+id/stopMeasureButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Stop Measure" />
+
+        <TextView
+            android:id="@+id/stopTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/stopMeasureButton"
+            android:layout_marginBottom="20px" />
+    </LinearLayout>
+
 </RelativeLayout>
