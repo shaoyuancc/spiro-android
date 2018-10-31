@@ -2,6 +2,7 @@ package shaoyuan.spiro.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
@@ -15,7 +16,7 @@ import android.widget.TextView;
 import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
-import org.w3c.dom.Text;
+import java.io.File;
 
 import shaoyuan.spiro.R;
 
@@ -54,6 +55,10 @@ public class HomeFragment extends Fragment {
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
+                MicrophoneSignalProcess.getInstance()
+                        .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_DOWNLOADS), "test2.wav"));
+
                 MicrophoneSignalProcess.getInstance().startCalibration(new SignalProcess.OnCalibrated() {
                     @Override
                     public void onCalibrated(int status) {
@@ -77,6 +82,22 @@ public class HomeFragment extends Fragment {
                 String filename = DataOutput.generateFileName();
                 DataOutput.writeFileExternalStorage(filename, preferencesToString());
 
+                MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
+                    @Override
+                    public void onResult(int flowRate) {
+                        Log.d("SPF-Lib","Flow Rate: " + flowRate);
+                        String data = DataOutput.createStringFromValue(flowRate);
+                        DataOutput.writeFileExternalStorage(filename, data);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultReturned(data);
+                            }
+                        });
+                    }
+                });
+
+                /*
                 MicrophoneSignalProcess.getInstance().startAnalyze(new SignalProcess.OnPeakFound() {
                      @Override
                      public void onResult(int peakFlowRate) {
@@ -92,6 +113,7 @@ public class HomeFragment extends Fragment {
 
                      }
                  });
+                 */
             }
 
 
