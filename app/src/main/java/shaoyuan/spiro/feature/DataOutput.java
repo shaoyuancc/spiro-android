@@ -44,10 +44,10 @@ public  class DataOutput {
         }
     }
 
-    public static String generateFileName(){
+    public static String generateFileName(String fileType){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
         Date date = new Date();
-        return (dateFormat.format(date) + ".csv");
+        return (dateFormat.format(date) + fileType);
     }
 
 

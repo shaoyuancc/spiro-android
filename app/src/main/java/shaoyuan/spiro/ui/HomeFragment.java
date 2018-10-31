@@ -17,6 +17,9 @@ import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import shaoyuan.spiro.R;
 
@@ -55,9 +58,10 @@ public class HomeFragment extends Fragment {
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
+                String filename = DataOutput.generateFileName(".wav");
                 MicrophoneSignalProcess.getInstance()
                         .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOWNLOADS), "test2.wav"));
+                                Environment.DIRECTORY_DOWNLOADS), filename));
 
                 MicrophoneSignalProcess.getInstance().startCalibration(new SignalProcess.OnCalibrated() {
                     @Override
@@ -79,21 +83,23 @@ public class HomeFragment extends Fragment {
         return new View.OnClickListener() {
             public void onClick(View v) {
                 startButtonPressed();
-                String filename = DataOutput.generateFileName();
+                String filename = DataOutput.generateFileName(".csv");
                 DataOutput.writeFileExternalStorage(filename, preferencesToString());
 
                 MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
                     @Override
                     public void onResult(int flowRate) {
-                        Log.d("SPF-Lib","Flow Rate: " + flowRate);
-                        String data = DataOutput.createStringFromValue(flowRate);
-                        DataOutput.writeFileExternalStorage(filename, data);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                resultReturned(data);
-                            }
-                        });
+                        if (flowRate > 0){
+                            Log.d("SPF-Lib","Flow Rate: " + flowRate);
+                            String data = DataOutput.createStringFromValue(flowRate);
+                            DataOutput.writeFileExternalStorage(filename, data);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    resultReturned(data);
+                                }
+                            });
+                        }
                     }
                 });
 
