@@ -8,7 +8,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/SPF-Lib-Android-2.0.14" />
             <option value="$PROJECT_DIR$/SPFLib-low-flow-rates" />
             <option value="$PROJECT_DIR$/app" />
           </set>

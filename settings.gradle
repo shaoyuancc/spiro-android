@@ -1,1 +1,1 @@
-include ':app', ':SPF-Lib-Android-2.0.14', ':SPFLib-low-flow-rates'
+include ':app', ':SPFLib-low-flow-rates'

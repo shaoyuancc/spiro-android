@@ -45,5 +45,5 @@ dependencies {
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation project(':SPF-Lib-Android-2.0.14')
+    implementation project(':SPFLib-low-flow-rates')
 }

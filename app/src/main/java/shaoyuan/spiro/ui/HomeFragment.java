@@ -17,9 +17,6 @@ import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import shaoyuan.spiro.R;
 
