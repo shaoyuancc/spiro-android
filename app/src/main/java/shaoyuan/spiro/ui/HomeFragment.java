@@ -85,9 +85,9 @@ public class HomeFragment extends Fragment {
 
                 MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
                     @Override
-                    public void onResult(int flowRate) {
-                        if (flowRate > 0){
-                            Log.d("SPF-Lib","Flow Rate: " + flowRate);
+                    public void onResult(int flowRate, double magnitude) {
+                        if (magnitude > 0.05){
+                            Log.d("SPF-Lib","Flow Rate: " + flowRate + " Magnitude: " + magnitude);
                             String data = DataOutput.createStringFromValue(flowRate);
                             DataOutput.writeFileExternalStorage(filename, data);
                             getActivity().runOnUiThread(new Runnable() {
