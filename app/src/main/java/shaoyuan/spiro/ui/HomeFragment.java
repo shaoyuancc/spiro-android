@@ -43,7 +43,7 @@ public class HomeFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.home_fragment, null);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        preferences = getActivity().getSharedPreferences("spiroAppPrefs", MODE_PRIVATE);
 
 
         startTextView = v.findViewById(R.id.startTextView);
@@ -53,11 +53,12 @@ public class HomeFragment extends Fragment {
 
         calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
-        calibrateButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
+        // calibrateButton.setVisibility(preferences.getBoolean("isCalibrated", true) ? View.INVISIBLE : View.VISIBLE);
 
         startMeasureButton = v.findViewById(R.id.startMeasureButton);
         startMeasureButton.setOnClickListener(createStartButtonListener());
-        startMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
+        startMeasureButton.setVisibility(
+                (preferences.getBoolean("isMeasuring", false) && preferences.getBoolean("isCalibrated", true)) ? View.VISIBLE : View.INVISIBLE);
 
         stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
@@ -138,8 +139,9 @@ public class HomeFragment extends Fragment {
         stopTextView.setText("Stopped");
         calibrateTextView.setText("Not Calibrated");
         preferences.edit().putBoolean("isMeasuring", false).apply();
+        preferences.edit().putBoolean("isCalibrated", false).apply();
         calibrateButton.setVisibility(View.VISIBLE);
-        startMeasureButton.setVisibility(View.VISIBLE);
+        startMeasureButton.setVisibility(View.INVISIBLE);
         stopMeasureButton.setVisibility(View.INVISIBLE);
 
     }
@@ -154,7 +156,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void calibrateButtonPressed() {
-        calibrateTextView.setText("Complete");
+
+        calibrateTextView.setText("Calibration Complete");
+        preferences.edit().putBoolean("isCalibrated", true).apply();
+        calibrateButton.setVisibility(View.INVISIBLE);
+        startMeasureButton.setVisibility(View.VISIBLE);
     }
 
     private void resultReturned(String data) {
