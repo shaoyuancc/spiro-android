@@ -1,5 +1,6 @@
 package shaoyuan.spiro.ui;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,12 +23,19 @@ import shaoyuan.spiro.R;
 
 import shaoyuan.spiro.feature.DataOutput;
 
+import static android.content.Context.MODE_PRIVATE;
+
 
 public class HomeFragment extends Fragment {
     private TextView startTextView;
     private TextView stopTextView;
     private TextView calibrateTextView;
     private TextView lastRecordTextView;
+    private Button calibrateButton;
+    private Button startMeasureButton;
+    private Button stopMeasureButton;
+
+    private SharedPreferences preferences;
 
     @Nullable
     @Override
@@ -35,19 +43,25 @@ public class HomeFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.home_fragment, null);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+
         startTextView = v.findViewById(R.id.startTextView);
         stopTextView = v.findViewById(R.id.stopTextView);
         calibrateTextView = v.findViewById(R.id.calibrateTextView);
         lastRecordTextView = v.findViewById(R.id.lastRecordTextView);
 
-        final Button calibrateButton = v.findViewById(R.id.calibrateButton);
+        calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
+        calibrateButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
 
-        final Button startMeasureButton = v.findViewById(R.id.startMeasureButton);
+        startMeasureButton = v.findViewById(R.id.startMeasureButton);
         startMeasureButton.setOnClickListener(createStartButtonListener());
+        startMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
 
-        final Button stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
+        stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
+        stopMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.VISIBLE : View.INVISIBLE);
 
         return v;
     }
@@ -55,7 +69,9 @@ public class HomeFragment extends Fragment {
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
+
                 String filename = DataOutput.generateFileName(".wav");
+
                 MicrophoneSignalProcess.getInstance()
                         .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOWNLOADS), filename));
@@ -72,6 +88,7 @@ public class HomeFragment extends Fragment {
                         });
                     }
                 });
+
             }
         };
     }
@@ -86,7 +103,7 @@ public class HomeFragment extends Fragment {
                 MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
                     @Override
                     public void onResult(int flowRate, double magnitude) {
-                        if (magnitude > 0.05){
+                        if (magnitude > 0.1){
                             Log.d("SPF-Lib","Flow Rate: " + flowRate + " Magnitude: " + magnitude);
                             String data = DataOutput.createStringFromValue(flowRate);
                             DataOutput.writeFileExternalStorage(filename, data);
@@ -100,23 +117,6 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
-                /*
-                MicrophoneSignalProcess.getInstance().startAnalyze(new SignalProcess.OnPeakFound() {
-                     @Override
-                     public void onResult(int peakFlowRate) {
-                         Log.d("SPF-Lib","Peak Flow Rate: " + peakFlowRate);
-                         String data = DataOutput.createStringFromValue(peakFlowRate);
-                         DataOutput.writeFileExternalStorage(filename, data);
-                         getActivity().runOnUiThread(new Runnable() {
-                             @Override
-                             public void run() {
-                                 resultReturned(data);
-                             }
-                         });
-
-                     }
-                 });
-                 */
             }
 
 
@@ -137,11 +137,20 @@ public class HomeFragment extends Fragment {
         startTextView.setText("Stopped");
         stopTextView.setText("Stopped");
         calibrateTextView.setText("Not Calibrated");
+        preferences.edit().putBoolean("isMeasuring", false).apply();
+        calibrateButton.setVisibility(View.VISIBLE);
+        startMeasureButton.setVisibility(View.VISIBLE);
+        stopMeasureButton.setVisibility(View.INVISIBLE);
+
     }
 
     private void startButtonPressed() {
         startTextView.setText("Measuring...");
         stopTextView.setText("");
+        preferences.edit().putBoolean("isMeasuring", true).apply();
+        calibrateButton.setVisibility(View.INVISIBLE);
+        startMeasureButton.setVisibility(View.INVISIBLE);
+        stopMeasureButton.setVisibility(View.VISIBLE);
     }
 
     private void calibrateButtonPressed() {
@@ -153,17 +162,16 @@ public class HomeFragment extends Fragment {
     }
 
     private String preferencesToString(){
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String deliminator = ",";
-        String preferences =
-                "usePeriodUuid" + deliminator + sharedPref.getString("usePeriodUuid", "") + '\n' +
-                "patientUuid" + deliminator + sharedPref.getString("patientUuid", "") + '\n' +
-                "patientName" + deliminator + sharedPref.getString("patientName", "") + '\n' +
-                "androidDeviceUuid" + deliminator + sharedPref.getString("androidDeviceUuid", "") + '\n' +
-                "usePeriodStart" + deliminator + sharedPref.getString("usePeriodStart", "") + '\n' +
-                "usePeriodEnd" + deliminator + sharedPref.getString("usePeriodEnd", "") + '\n' +
-                "applicationMode" + deliminator + sharedPref.getString("applicationMode", "") + "\n\n";
-        return preferences;
+        String prefString =
+                "usePeriodUuid" + deliminator + preferences.getString("usePeriodUuid", "") + '\n' +
+                "patientUuid" + deliminator + preferences.getString("patientUuid", "") + '\n' +
+                "patientName" + deliminator + preferences.getString("patientName", "") + '\n' +
+                "androidDeviceUuid" + deliminator + preferences.getString("androidDeviceUuid", "") + '\n' +
+                "usePeriodStart" + deliminator + preferences.getString("usePeriodStart", "") + '\n' +
+                "usePeriodEnd" + deliminator + preferences.getString("usePeriodEnd", "") + '\n' +
+                "applicationMode" + deliminator + preferences.getString("applicationMode", "") + "\n\n";
+        return prefString;
     }
 
 }
