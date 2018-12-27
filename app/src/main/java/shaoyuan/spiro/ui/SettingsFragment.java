@@ -27,6 +27,8 @@ import java.util.List;
 
 import shaoyuan.spiro.R;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * This fragment shows general preferences only. It is used when the
  * activity is showing a two-pane settings UI.
@@ -101,6 +103,7 @@ public  class SettingsFragment extends PreferenceFragment {
         bindPreferenceSummaryToValue(findPreference("androidDeviceUuid"));
         bindPreferenceSummaryToValue(findPreference("usePeriodStart"));
         bindPreferenceSummaryToValue(findPreference("usePeriodEnd"));
+        bindPreferenceSummaryToValue(findPreference("intensityThreshold"));
         bindPreferenceSummaryToValue(findPreference("applicationMode"));
     }
 

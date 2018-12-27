@@ -70,6 +70,13 @@
         android:singleLine="true"
         android:summary="@string/attribute_description_usePeriodEnd"
         android:title="@string/attribute_display_usePeriodEnd" />
+    <EditTextPreference
+        android:defaultValue="0.1"
+        android:key="intensityThreshold"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="Threshold of intensity at which readings are recorded"
+        android:title="IntensityThreshold" />
     <ListPreference
         android:defaultValue="APP_MODE_PASSIVE"
         android:entries="@array/attribute_applicationMode_titles"

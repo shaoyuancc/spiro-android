@@ -34,6 +34,7 @@ public class HomeFragment extends Fragment {
     private Button calibrateButton;
     private Button startMeasureButton;
     private Button stopMeasureButton;
+    private Double intensityThreshold;
 
     private SharedPreferences preferences;
 
@@ -43,8 +44,8 @@ public class HomeFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.home_fragment, null);
 
-        preferences = getActivity().getSharedPreferences("spiroAppPrefs", MODE_PRIVATE);
-
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 
         startTextView = v.findViewById(R.id.startTextView);
         stopTextView = v.findViewById(R.id.stopTextView);
@@ -64,8 +65,22 @@ public class HomeFragment extends Fragment {
         stopMeasureButton.setOnClickListener(createStopButtonListener());
         stopMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.VISIBLE : View.INVISIBLE);
 
+        intensityThreshold = Double.valueOf(preferences.getString("intensityThreshold","0.1"));
+        Log.d("SPF-Lib", "Intensity Threshold onCreate is " + preferences.getString("intensityThreshold","0.1"));
+
         return v;
     }
+
+    SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("intensityThreshold")){
+                String intensityThresholdString = preferences.getString("intensityThreshold","0.1");
+                intensityThreshold = Double.valueOf(intensityThresholdString);
+                Log.d("SPF-Lib", "Intensity Threshold Changed to " + intensityThresholdString);
+            }
+        }
+    };
 
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
@@ -104,7 +119,7 @@ public class HomeFragment extends Fragment {
                 MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
                     @Override
                     public void onResult(int flowRate, double magnitude) {
-                        if (magnitude > 0.1){
+                        if (magnitude > intensityThreshold){
                             Log.d("SPF-Lib","Flow Rate: " + flowRate + " Magnitude: " + magnitude);
                             String data = DataOutput.createStringFromValue(flowRate);
                             DataOutput.writeFileExternalStorage(filename, data);
