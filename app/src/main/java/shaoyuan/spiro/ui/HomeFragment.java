@@ -13,12 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
 
 import java.io.File;
 
+import shaoyuan.spiro.AppUtil;
 import shaoyuan.spiro.R;
 
 import shaoyuan.spiro.feature.DataOutput;
@@ -31,6 +33,7 @@ public class HomeFragment extends Fragment {
     private TextView stopTextView;
     private TextView calibrateTextView;
     private TextView lastRecordTextView;
+    private TextView intensityThresholdTextView;
     private Button calibrateButton;
     private Button startMeasureButton;
     private Button stopMeasureButton;
@@ -51,6 +54,7 @@ public class HomeFragment extends Fragment {
         stopTextView = v.findViewById(R.id.stopTextView);
         calibrateTextView = v.findViewById(R.id.calibrateTextView);
         lastRecordTextView = v.findViewById(R.id.lastRecordTextView);
+        intensityThresholdTextView = v.findViewById(R.id.intensityThresholdTextView);
 
         calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
@@ -65,19 +69,31 @@ public class HomeFragment extends Fragment {
         stopMeasureButton.setOnClickListener(createStopButtonListener());
         stopMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.VISIBLE : View.INVISIBLE);
 
-        intensityThreshold = Double.valueOf(preferences.getString("intensityThreshold","0.1"));
-        Log.d("SPF-Lib", "Intensity Threshold onCreate is " + preferences.getString("intensityThreshold","0.1"));
+        intensityThreshold = getIntensityThreshold();
 
         return v;
+    }
+
+    public double getIntensityThreshold(){
+        Double val = AppUtil.convertStringToDouble(preferences.getString("intensityThreshold", "0.1"));
+        if (val == null){
+            Log.d("SPF-Lib", "Intensity Threshold Invalid. Using default 0.1");
+            intensityThresholdTextView.setText("Invalid. Using default 0.1");
+            return 0.1;
+        }else {
+            Log.d("SPF-Lib", "Intensity Threshold onCreate is " + val.toString());
+            intensityThresholdTextView.setText( val.toString());
+            return val;
+        }
+
     }
 
     SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("intensityThreshold")){
-                String intensityThresholdString = preferences.getString("intensityThreshold","0.1");
-                intensityThreshold = Double.valueOf(intensityThresholdString);
-                Log.d("SPF-Lib", "Intensity Threshold Changed to " + intensityThresholdString);
+                intensityThreshold = getIntensityThreshold();
+                Log.d("SPF-Lib", "Intensity Threshold Changed to " + intensityThreshold.toString());
             }
         }
     };

@@ -11,6 +11,17 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/TextView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Intensity Threshold:" />
+
+        <TextView
+            android:id="@+id/intensityThresholdTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/calibrateButton"
             android:layout_width="match_parent"
@@ -70,6 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/stopMeasureButton"
             android:layout_marginBottom="20px" />
+
     </LinearLayout>
 
 </RelativeLayout>
