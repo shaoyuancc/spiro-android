@@ -15,12 +15,15 @@
             android:id="@+id/TextView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textAlignment="center"
             android:text="Intensity Threshold:" />
 
         <TextView
             android:id="@+id/intensityThresholdTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textAlignment="center"/>
 
         <Button
             android:id="@+id/calibrateButton"
