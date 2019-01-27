@@ -1,6 +1,6 @@
 package shaoyuan.spiro.ui;
 
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
@@ -24,8 +23,7 @@ import shaoyuan.spiro.AppUtil;
 import shaoyuan.spiro.R;
 
 import shaoyuan.spiro.feature.DataOutput;
-
-import static android.content.Context.MODE_PRIVATE;
+import shaoyuan.spiro.service.SpfService;
 
 
 public class HomeFragment extends Fragment {
@@ -70,6 +68,28 @@ public class HomeFragment extends Fragment {
         stopMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.VISIBLE : View.INVISIBLE);
 
         intensityThreshold = getIntensityThreshold();
+
+        Button startServiceButton = v.findViewById(R.id.start_foreground_service_button);
+        startServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("SpfService", "Start Foreground Service Pressed");
+                Intent intent = new Intent(getActivity(), SpfService.class);
+                intent.setAction(SpfService.ACTION_START_FOREGROUND_SERVICE);
+                getActivity().startService(intent);
+            }
+        });
+
+        Button stopServiceButton = v.findViewById(R.id.stop_foreground_service_button);
+        stopServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("SpfService", "Stop Foreground Service Pressed");
+                Intent intent = new Intent(getActivity(), SpfService.class);
+                intent.setAction(SpfService.ACTION_STOP_FOREGROUND_SERVICE);
+                getActivity().startService(intent);
+            }
+        });
 
         return v;
     }
