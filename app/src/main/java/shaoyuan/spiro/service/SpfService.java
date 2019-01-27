@@ -163,11 +163,13 @@ public class SpfService extends Service {
 
     public void startCalibration() {
 
+        /*
         String filename = DataOutput.generateFileName(".wav");
 
         MicrophoneSignalProcess.getInstance()
                 .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_DOWNLOADS), filename));
+        */
 
         MicrophoneSignalProcess.getInstance().startCalibration(new SignalProcess.OnCalibrated() {
             @Override
@@ -193,7 +195,9 @@ public class SpfService extends Service {
                     Log.d(TAG_FOREGROUND_SERVICE,"Flow Rate: " + flowRate + " Magnitude: " + magnitude);
                     String data = DataOutput.createStringFromValue(flowRate);
                     DataOutput.writeFileExternalStorage(filename, data);
-                    serviceCallbacks.showResult(data);
+                    if (serviceCallbacks != null) {
+                        serviceCallbacks.showResult(data);
+                    }
                 }
             }
         });

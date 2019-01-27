@@ -31,9 +31,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         navigation.setOnNavigationItemSelectedListener(this);
 
         //preferences = this.getSharedPreferences("spiroAppPrefs", Context.MODE_PRIVATE);
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
-        navigation.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
+//        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+//        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+//        navigation.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
 
 
     }
