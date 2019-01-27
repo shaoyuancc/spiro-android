@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private Button calibrateButton;
     private Button startMeasureButton;
     private Button stopMeasureButton;
-    private Double intensityThreshold;
+
 
     private SharedPreferences preferences;
 
@@ -56,7 +56,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         View v = inflater.inflate(R.layout.home_fragment, null);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 
         startTextView = v.findViewById(R.id.startTextView);
         stopTextView = v.findViewById(R.id.stopTextView);
@@ -76,8 +75,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
         stopMeasureButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.VISIBLE : View.INVISIBLE);
-
-        intensityThreshold = getIntensityThreshold();
 
         Button startServiceButton = v.findViewById(R.id.start_foreground_service_button);
         startServiceButton.setOnClickListener(new View.OnClickListener() {
@@ -100,21 +97,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
                 Intent intent = new Intent(getActivity(), SpfService.class);
                 intent.setAction(SpfService.ACTION_STOP_FOREGROUND_SERVICE);
                 getActivity().startService(intent);
-            }
-        });
-
-
-        Button randomNumberButton = v.findViewById(R.id.random_number_button);
-        randomNumberButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mBound) {
-                    // Call a method from the LocalService.
-                    // However, if this call were something that might hang, then this request should
-                    // occur in a separate thread to avoid slowing down the activity performance.
-                    int num = mService.getRandomNumber();
-                    Toast.makeText(getActivity(), "number: " + num, Toast.LENGTH_SHORT).show();
-                }
             }
         });
 
@@ -163,58 +145,12 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         }
     };
 
-    public double getIntensityThreshold(){
-        Double val = AppUtil.convertStringToDouble(preferences.getString("intensityThreshold", "0.1"));
-        if (val == null){
-            Log.d("SPF-Lib", "Intensity Threshold Invalid. Using default 0.1");
-            intensityThresholdTextView.setText("Invalid. Using default 0.1");
-            return 0.1;
-        }else {
-            Log.d("SPF-Lib", "Intensity Threshold onCreate is " + val.toString());
-            intensityThresholdTextView.setText( val.toString());
-            return val;
-        }
-
-    }
-
-    SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals("intensityThreshold")){
-                intensityThreshold = getIntensityThreshold();
-                Log.d("SPF-Lib", "Intensity Threshold Changed to " + intensityThreshold.toString());
-            }
-        }
-    };
-
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
                 if (mBound){
                     mService.startCalibration();
                 }
-
-                /*
-                String filename = DataOutput.generateFileName(".wav");
-
-                MicrophoneSignalProcess.getInstance()
-                        .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOWNLOADS), filename));
-
-                MicrophoneSignalProcess.getInstance().startCalibration(new SignalProcess.OnCalibrated() {
-                    @Override
-                    public void onCalibrated(int status) {
-                        MicrophoneSignalProcess.getInstance().stopCalibration();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showCalibrated();
-                            }
-                        });
-                    }
-                });
-                */
-
             }
         };
     }
@@ -223,37 +159,14 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         return new View.OnClickListener() {
             public void onClick(View v) {
                 startButtonPressed();
-                String filename = DataOutput.generateFileName(".csv");
-                DataOutput.writeFileExternalStorage(filename, preferencesToString());
-
-                MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
-                    @Override
-                    public void onResult(int flowRate, double magnitude) {
-                        if (magnitude > intensityThreshold){
-                            Log.d("SPF-Lib","Flow Rate: " + flowRate + " Magnitude: " + magnitude);
-                            String data = DataOutput.createStringFromValue(flowRate);
-                            DataOutput.writeFileExternalStorage(filename, data);
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    resultReturned(data);
-                                }
-                            });
-                        }
-                    }
-                });
-
+                mService.startMeasurement();
             }
-
-
         };
     }
 
     private View.OnClickListener createStopButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
-                MicrophoneSignalProcess.getInstance().stopAnalyze();
-                MicrophoneSignalProcess.getInstance().close();
                 stopButtonPressed();
                 }
             };
@@ -268,7 +181,7 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         calibrateButton.setVisibility(View.VISIBLE);
         startMeasureButton.setVisibility(View.INVISIBLE);
         stopMeasureButton.setVisibility(View.INVISIBLE);
-
+        mService.stopMeasurement();
     }
 
     private void startButtonPressed() {
@@ -293,21 +206,26 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         });
     }
 
-    private void resultReturned(String data) {
-        lastRecordTextView.setText(data);
+    @Override
+    public void showResult(String result) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                lastRecordTextView.setText(result);
+            }
+        });
     }
 
-    private String preferencesToString(){
-        String deliminator = ",";
-        String prefString =
-                "usePeriodUuid" + deliminator + preferences.getString("usePeriodUuid", "") + '\n' +
-                "patientUuid" + deliminator + preferences.getString("patientUuid", "") + '\n' +
-                "patientName" + deliminator + preferences.getString("patientName", "") + '\n' +
-                "androidDeviceUuid" + deliminator + preferences.getString("androidDeviceUuid", "") + '\n' +
-                "usePeriodStart" + deliminator + preferences.getString("usePeriodStart", "") + '\n' +
-                "usePeriodEnd" + deliminator + preferences.getString("usePeriodEnd", "") + '\n' +
-                "applicationMode" + deliminator + preferences.getString("applicationMode", "") + "\n\n";
-        return prefString;
+    @Override
+    public void setIntensityThresholdTextView(String intensityText){
+        Log.d("SpfService", "setIntensityThresholdTextView received: " + intensityText);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                intensityThresholdTextView.setText(intensityText);
+            }
+        });
     }
 
 }

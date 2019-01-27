@@ -1,6 +1,7 @@
 package shaoyuan.spiro;
 
 import android.content.res.Resources;
+import android.preference.Preference;
 
 import java.io.IOException;
 import java.io.InputStream;
