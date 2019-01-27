@@ -1,9 +1,12 @@
 package shaoyuan.spiro.ui;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.synthnet.spf.MicrophoneSignalProcess;
 import com.synthnet.spf.SignalProcess;
@@ -38,6 +42,9 @@ public class HomeFragment extends Fragment {
     private Double intensityThreshold;
 
     private SharedPreferences preferences;
+
+    SpfService mService;
+    boolean mBound = false;
 
     @Nullable
     @Override
@@ -77,6 +84,8 @@ public class HomeFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), SpfService.class);
                 intent.setAction(SpfService.ACTION_START_FOREGROUND_SERVICE);
                 getActivity().startService(intent);
+                getActivity().bindService(intent, mConnection, getContext().BIND_IMPORTANT);
+                Log.d("SpfService", "Bound to service");
             }
         });
 
@@ -91,8 +100,60 @@ public class HomeFragment extends Fragment {
             }
         });
 
+
+        Button randomNumberButton = v.findViewById(R.id.random_number_button);
+        randomNumberButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBound) {
+                    // Call a method from the LocalService.
+                    // However, if this call were something that might hang, then this request should
+                    // occur in a separate thread to avoid slowing down the activity performance.
+                    int num = mService.getRandomNumber();
+                    Toast.makeText(getActivity(), "number: " + num, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         return v;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(getActivity(), SpfService.class);
+        getActivity().bindService(intent, mConnection, getContext().BIND_IMPORTANT);
+        Log.d("SpfService", "Bound to service");
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unbindService(mConnection);
+        mBound = false;
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            SpfService.LocalBinder binder = (SpfService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            Log.d("SpfService", "Service connected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+            Log.d("SpfService", "service disconnected");
+        }
+    };
 
     public double getIntensityThreshold(){
         Double val = AppUtil.convertStringToDouble(preferences.getString("intensityThreshold", "0.1"));
