@@ -1,6 +1,7 @@
 package shaoyuan.spiro.ui;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -27,10 +28,11 @@ import shaoyuan.spiro.AppUtil;
 import shaoyuan.spiro.R;
 
 import shaoyuan.spiro.feature.DataOutput;
+import shaoyuan.spiro.service.ServiceCallbacks;
 import shaoyuan.spiro.service.SpfService;
 
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements ServiceCallbacks {
     private TextView startTextView;
     private TextView stopTextView;
     private TextView calibrateTextView;
@@ -45,6 +47,7 @@ public class HomeFragment extends Fragment {
 
     SpfService mService;
     boolean mBound = false;
+
 
     @Nullable
     @Override
@@ -131,8 +134,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().unbindService(mConnection);
-        mBound = false;
+        if (mBound){
+            mService.setCallbacks(null); // unregister
+            getActivity().unbindService(mConnection);
+            mBound = false;
+        }
+
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -145,6 +152,7 @@ public class HomeFragment extends Fragment {
             SpfService.LocalBinder binder = (SpfService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
+            mService.setCallbacks(HomeFragment.this); // register
             Log.d("SpfService", "Service connected");
         }
 
@@ -182,7 +190,11 @@ public class HomeFragment extends Fragment {
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
+                if (mBound){
+                    mService.startCalibration();
+                }
 
+                /*
                 String filename = DataOutput.generateFileName(".wav");
 
                 MicrophoneSignalProcess.getInstance()
@@ -196,11 +208,12 @@ public class HomeFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                calibrateButtonPressed();
+                                showCalibrated();
                             }
                         });
                     }
                 });
+                */
 
             }
         };
@@ -267,12 +280,17 @@ public class HomeFragment extends Fragment {
         stopMeasureButton.setVisibility(View.VISIBLE);
     }
 
-    private void calibrateButtonPressed() {
-
-        calibrateTextView.setText("Calibration Complete");
-        preferences.edit().putBoolean("isCalibrated", true).apply();
-        calibrateButton.setVisibility(View.INVISIBLE);
-        startMeasureButton.setVisibility(View.VISIBLE);
+    @Override
+    public void showCalibrated() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                calibrateTextView.setText("Calibration Complete");
+                preferences.edit().putBoolean("isCalibrated", true).apply();
+                calibrateButton.setVisibility(View.INVISIBLE);
+                startMeasureButton.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void resultReturned(String data) {

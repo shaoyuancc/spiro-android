@@ -1,5 +1,7 @@
 package shaoyuan.spiro.service;
 
+import android.app.Activity;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,31 +14,39 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.synthnet.spf.MicrophoneSignalProcess;
+import com.synthnet.spf.SignalProcess;
+
+import java.io.File;
 import java.util.Random;
 
 import shaoyuan.spiro.R;
+import shaoyuan.spiro.feature.DataOutput;
 
-public class SpfService extends Service{
+public class SpfService extends Service {
 
     private static final String TAG_FOREGROUND_SERVICE = "SpfService";//"FOREGROUND_SERVICE";
+    public static final String RESULT = "result";
+    public static final String NOTIFICATION = "shaoyuan.spiro.service";
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
-
     public static final String ACTION_STOP_FOREGROUND_SERVICE = "ACTION_STOP_FOREGROUND_SERVICE";
-
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
-
     public static final String ACTION_PLAY = "ACTION_PLAY";
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
+    // Registered callbacks
+    private ServiceCallbacks serviceCallbacks;
     // Random number generator
     private final Random mGenerator = new Random();
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -53,9 +63,35 @@ public class SpfService extends Service{
         return mBinder;
     }
 
+    public void setCallbacks(ServiceCallbacks callbacks) {
+        serviceCallbacks = callbacks;
+    }
+
     /** method for clients */
     public int getRandomNumber() {
         return mGenerator.nextInt(100);
+    }
+
+    public void startCalibration() {
+
+        String filename = DataOutput.generateFileName(".wav");
+
+        MicrophoneSignalProcess.getInstance()
+                .setRecordFile(new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS), filename));
+
+        MicrophoneSignalProcess.getInstance().startCalibration(new SignalProcess.OnCalibrated() {
+            @Override
+            public void onCalibrated(int status) {
+                MicrophoneSignalProcess.getInstance().stopCalibration();
+                Log.d(TAG_FOREGROUND_SERVICE, "onCalibrated Called");
+                if (serviceCallbacks != null) {
+                    serviceCallbacks.showCalibrated();
+                    Log.d(TAG_FOREGROUND_SERVICE, "showCalibrated Called");
+                }
+            }
+        });
+
     }
 
     public SpfService() {
