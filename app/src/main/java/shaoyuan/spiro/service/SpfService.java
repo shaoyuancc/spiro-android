@@ -37,6 +37,11 @@ public class SpfService extends Service {
     public static final String RESULT = "result";
     public static final String NOTIFICATION = "shaoyuan.spiro.service";
     private Double intensityThreshold;
+    private boolean isCalibrated;
+    private boolean isCalibrating;
+    private boolean isMeasuring;
+    private boolean isStopped;
+    private String lastRecordValue;
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
     public static final String ACTION_STOP_FOREGROUND_SERVICE = "ACTION_STOP_FOREGROUND_SERVICE";
@@ -50,11 +55,27 @@ public class SpfService extends Service {
 
     private SharedPreferences preferences;
 
+    /**
+     * Getters and setters
+     */
+    public boolean getIsCalibrating(){ return isCalibrating; }
+    public boolean getIsCalibrated(){ return isCalibrated; }
+    public boolean getIsMeasuring(){ return isMeasuring; }
+    public boolean getIsStopped(){ return isStopped; }
+    public String getLastRecordValue(){ return lastRecordValue; }
+    public Double getIntensityThreshold(){ return intensityThreshold; }
+
+    public void setIsCalibrated(Boolean input){ isCalibrated = input; }
+    public void setIsCalibrating(Boolean input){ isCalibrating = input; }
+    public void setIsMeasuring(Boolean input){ isMeasuring = input; }
+    public void setIsStopped(Boolean input){ isStopped = input; }
+    public void setLastRecordValue(String input){ lastRecordValue = input; }
+
     SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("intensityThreshold")){
-                intensityThreshold = getIntensityThreshold();
+                intensityThreshold = getIntensityThresholdFromPref();
                 Log.d("SPF-Lib", "Intensity Threshold Changed to " + intensityThreshold.toString());
             }
         }
@@ -90,7 +111,13 @@ public class SpfService extends Service {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
-        intensityThreshold = getIntensityThreshold();
+        // Calibrate Button Pressed State
+        intensityThreshold = getIntensityThresholdFromPref();
+        isCalibrated = false;
+        isCalibrating = true;
+        isMeasuring = false;
+        isStopped = false;
+        lastRecordValue = getString(R.string.empty_last_record_value);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             startMyOwnForeground();
@@ -162,7 +189,7 @@ public class SpfService extends Service {
     /** method for clients */
 
     public void startCalibration() {
-
+        Log.d(TAG_FOREGROUND_SERVICE, "startCalibration Called");
         /*
         String filename = DataOutput.generateFileName(".wav");
 
@@ -177,6 +204,8 @@ public class SpfService extends Service {
                 MicrophoneSignalProcess.getInstance().stopCalibration();
                 Log.d(TAG_FOREGROUND_SERVICE, "onCalibrated Called");
                 if (serviceCallbacks != null) {
+                    setIsCalibrating(false);
+                    setIsCalibrated(true);
                     serviceCallbacks.showCalibrated();
                     Log.d(TAG_FOREGROUND_SERVICE, "showCalibrated Called");
                 }
@@ -197,6 +226,9 @@ public class SpfService extends Service {
                     DataOutput.writeFileExternalStorage(filename, data);
                     if (serviceCallbacks != null) {
                         serviceCallbacks.showResult(data);
+                        setLastRecordValue(data);
+                    }else{
+                        setLastRecordValue(data);
                     }
                 }
             }
@@ -208,7 +240,7 @@ public class SpfService extends Service {
         MicrophoneSignalProcess.getInstance().close();
     }
 
-    public double getIntensityThreshold(){
+    public double getIntensityThresholdFromPref(){
         Double val = AppUtil.convertStringToDouble(preferences.getString("intensityThreshold", "0.1"));
         if (val == null){
             Log.d(TAG_FOREGROUND_SERVICE, "Intensity Threshold Invalid. Using default 0.1");

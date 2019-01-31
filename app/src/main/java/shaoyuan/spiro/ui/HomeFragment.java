@@ -1,14 +1,10 @@
 package shaoyuan.spiro.ui;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
 import android.util.Log;
@@ -17,17 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.synthnet.spf.MicrophoneSignalProcess;
-import com.synthnet.spf.SignalProcess;
-
-import java.io.File;
-
-import shaoyuan.spiro.AppUtil;
 import shaoyuan.spiro.R;
 
-import shaoyuan.spiro.feature.DataOutput;
 import shaoyuan.spiro.service.ServiceCallbacks;
 import shaoyuan.spiro.service.SpfService;
 
@@ -41,10 +29,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private Button calibrateButton;
     private Button startMeasureButton;
     private Button stopMeasureButton;
-    private boolean currentlyCalibrating = false;
-
-
-    private SharedPreferences preferences;
 
     SpfService mService;
     boolean mBound = false;
@@ -57,8 +41,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
 
         View v = inflater.inflate(R.layout.home_fragment, null);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
         startTextView = v.findViewById(R.id.startTextView);
         stopTextView = v.findViewById(R.id.stopTextView);
         calibrateTextView = v.findViewById(R.id.calibrateTextView);
@@ -67,15 +49,15 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
 
         calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
-        calibrateButton.setVisibility(preferences.getBoolean("isMeasuring", true) ? View.INVISIBLE : View.VISIBLE);
 
         startMeasureButton = v.findViewById(R.id.startMeasureButton);
         startMeasureButton.setOnClickListener(createStartButtonListener());
-        startMeasureButton.setVisibility(
-                (preferences.getBoolean("isMeasuring", false) && preferences.getBoolean("isCalibrated", true)) ? View.VISIBLE : View.INVISIBLE);
+        startMeasureButton.setVisibility(View.INVISIBLE);
 
         stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
+        stopMeasureButton.setVisibility(View.INVISIBLE);
+
 
         return v;
     }
@@ -112,10 +94,13 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
             mService = binder.getService();
             mBound = true;
             mService.setCallbacks(HomeFragment.this); // register
-            if (currentlyCalibrating){
+            lastRecordTextView.setText(mService.getLastRecordValue());
+            intensityThresholdTextView.setText(mService.getIntensityThreshold().toString());
+            if (mService.getIsCalibrating()){
                 mService.startCalibration();
             }
             Log.d("SpfService", "Service connected");
+            updateUI();
         }
 
         @Override
@@ -128,12 +113,17 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private View.OnClickListener createCalibrateButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("SpfService", "currentlyCalibrating");
+                Log.d("SpfService", "calibratebuttonpressed");
                 Intent intent = new Intent(getActivity(), SpfService.class);
                 intent.setAction(SpfService.ACTION_START_FOREGROUND_SERVICE);
                 getActivity().startService(intent);
-                currentlyCalibrating = true;
                 getActivity().bindService(intent, mConnection, getContext().BIND_IMPORTANT);
+                calibrateButton.setVisibility(View.INVISIBLE);
+                startMeasureButton.setVisibility(View.INVISIBLE);
+                stopMeasureButton.setVisibility(View.VISIBLE);
+                startTextView.setText("");
+                stopTextView.setText("");
+                calibrateTextView.setText("Calibrating...");
             }
         };
     }
@@ -141,9 +131,12 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private View.OnClickListener createStartButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
-                startButtonPressed();
+                Log.d("SpfService", "start button pressed");
                 if (mBound){
+                    Log.d("SpfService", "bound to service in start button pressed");
+                    mService.setIsMeasuring(true);
                     mService.startMeasurement();
+                    updateUI();
                 }
             }
         };
@@ -152,47 +145,92 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private View.OnClickListener createStopButtonListener() {
         return new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("SpfService", "Stop Foreground Service Pressed");
+                Log.d("SpfService", "stop button pressed");
+                if (mBound) {
+                    mService.setIsStopped(true);
+                    mService.setIsMeasuring(false);
+                    mService.setIsCalibrated(false);
+                    updateUI();
+                    mService.stopMeasurement();
+                }
                 Intent intent = new Intent(getActivity(), SpfService.class);
                 intent.setAction(SpfService.ACTION_STOP_FOREGROUND_SERVICE);
                 getActivity().startService(intent);
-                stopButtonPressed();
+
+
                 }
             };
     }
 
-    private void stopButtonPressed() {
-        startTextView.setText("Stopped");
-        stopTextView.setText("Stopped");
-        calibrateTextView.setText("Not Calibrated");
-        preferences.edit().putBoolean("isMeasuring", false).apply();
-        preferences.edit().putBoolean("isCalibrated", false).apply();
-        calibrateButton.setVisibility(View.VISIBLE);
-        if (mBound) {
-            mService.stopMeasurement();
+    private void updateUI(){
+        Log.d("SpfService", "Enter Update UI: mBound "+ mBound +
+                " |isCalibrated " + mService.getIsCalibrated() +
+                " |isCalibrating " + mService.getIsCalibrating() +
+                " |isMeasuring " + mService.getIsMeasuring() +
+                " |isStopped " + mService.getIsStopped());
+        if (mBound){
+            // Reset state
+            if (mService.getIsStopped()){
+                Log.d("SpfService", "RESET STATE");
+                calibrateButton.setVisibility(View.VISIBLE);
+                startMeasureButton.setVisibility(View.INVISIBLE);
+                stopMeasureButton.setVisibility(View.INVISIBLE);
+                startTextView.setText("");
+                stopTextView.setText("");
+                calibrateTextView.setText("Not Calibrated");
+            }
+            // Calibrate Button Pressed
+            else if (!mService.getIsCalibrated() && mService.getIsCalibrating() &&
+                    !mService.getIsMeasuring() && !mService.getIsStopped()) {
+                Log.d("SpfService", "CALIBRATE BUTTON PRESSED STATE");
+                calibrateButton.setVisibility(View.INVISIBLE);
+                startMeasureButton.setVisibility(View.INVISIBLE);
+                stopMeasureButton.setVisibility(View.VISIBLE);
+                startTextView.setText("");
+                stopTextView.setText("");
+                calibrateTextView.setText("Calibrating...");
+            }
+            // Calibration Complete
+            else if (mService.getIsCalibrated() && !mService.getIsCalibrating() &&
+                    !mService.getIsMeasuring() && !mService.getIsStopped()) {
+                Log.d("SpfService", "CALIBRATION COMPLETE STATE");
+                calibrateButton.setVisibility(View.INVISIBLE);
+                startMeasureButton.setVisibility(View.VISIBLE);
+                stopMeasureButton.setVisibility(View.VISIBLE);
+                startTextView.setText("Ready to Start");
+                stopTextView.setText("");
+                calibrateTextView.setText("Calibration Complete");
+            }
+            // Measuring State
+            else if (mService.getIsCalibrated() && !mService.getIsCalibrating() &&
+                    mService.getIsMeasuring() && !mService.getIsStopped()) {
+                Log.d("SpfService", "MEASURING STATE");
+                calibrateButton.setVisibility(View.INVISIBLE);
+                startMeasureButton.setVisibility(View.INVISIBLE);
+                stopMeasureButton.setVisibility(View.VISIBLE);
+                startTextView.setText("Measuring...");
+                stopTextView.setText("");
+                calibrateTextView.setText("Calibration Complete");
+            }else {
+                Log.d("SpfService", "UNDEFINED STATE");
+            }
         }
-    }
 
-    private void startButtonPressed() {
-        startTextView.setText("Measuring...");
-        stopTextView.setText("");
-        preferences.edit().putBoolean("isMeasuring", true).apply();
-        calibrateButton.setVisibility(View.INVISIBLE);
-        startMeasureButton.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void showCalibrated() {
         Log.d("SpfService", "Done Calibrating");
-        currentlyCalibrating = false;
         if (getActivity() != null){
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    calibrateTextView.setText("Calibration Complete");
-                    preferences.edit().putBoolean("isCalibrated", true).apply();
                     calibrateButton.setVisibility(View.INVISIBLE);
                     startMeasureButton.setVisibility(View.VISIBLE);
+                    stopMeasureButton.setVisibility(View.VISIBLE);
+                    startTextView.setText("Ready to Start");
+                    stopTextView.setText("");
+                    calibrateTextView.setText("Calibration Complete");
                 }
             });
         }

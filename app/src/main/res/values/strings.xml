@@ -30,4 +30,8 @@
     <string name="title_home">Home</string>
     <string name="title_settings">Settings</string>
 
+    <!-- Strings related to Measurement -->
+    <string name="empty_last_record_date_time">NA</string>
+    <string name="empty_last_record_value">NA</string>
+
 </resources>
