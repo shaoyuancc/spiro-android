@@ -26,6 +26,7 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
     private TextView calibrateTextView;
     private TextView lastRecordTextView;
     private TextView intensityThresholdTextView;
+    private TextView isConnectedTextView;
     private Button calibrateButton;
     private Button startMeasureButton;
     private Button stopMeasureButton;
@@ -46,6 +47,7 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         calibrateTextView = v.findViewById(R.id.calibrateTextView);
         lastRecordTextView = v.findViewById(R.id.lastRecordTextView);
         intensityThresholdTextView = v.findViewById(R.id.intensityThresholdTextView);
+        isConnectedTextView = v.findViewById(R.id.isConnectedTextView);
 
         calibrateButton = v.findViewById(R.id.calibrateButton);
         calibrateButton.setOnClickListener(createCalibrateButtonListener());
@@ -57,7 +59,6 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
         stopMeasureButton = v.findViewById(R.id.stopMeasureButton);
         stopMeasureButton.setOnClickListener(createStopButtonListener());
         stopMeasureButton.setVisibility(View.INVISIBLE);
-
 
         return v;
     }
@@ -95,6 +96,7 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
             mBound = true;
             mService.setCallbacks(HomeFragment.this); // register
             lastRecordTextView.setText(mService.getLastRecordValue());
+            isConnectedTextView.setText(String.valueOf(mService.getIsConnected()));
             intensityThresholdTextView.setText(mService.getIntensityThreshold().toString());
             if (mService.getIsCalibrating()){
                 mService.startCalibration();
@@ -258,5 +260,17 @@ public class HomeFragment extends Fragment implements ServiceCallbacks {
             }
         });
     }
+
+    @Override
+    public void setIsConnectedTextView(Boolean isConnected){
+        Log.d("SpfService", "setIsConnectedTextView received: " + isConnected);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                isConnectedTextView.setText(isConnected.toString());
+            }
+        });
+    }
+
 
 }

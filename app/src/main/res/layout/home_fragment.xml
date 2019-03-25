@@ -12,6 +12,20 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/isConnectedLabelTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Device Connected:"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/isConnectedTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textAlignment="center" />
+
+        <TextView
             android:id="@+id/TextView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

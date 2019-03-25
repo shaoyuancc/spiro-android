@@ -86,14 +86,23 @@ public class SpfService extends Service {
                     case 0:
                         Log.d(TAG, "Headset is unplugged");
                         isConnected = false;
+                        if (serviceCallbacks != null) {
+                            serviceCallbacks.setIsConnectedTextView(isConnected);
+                        }
                         break;
                     case 1:
                         Log.d(TAG, "Headset is plugged");
                         isConnected = true;
+                        if (serviceCallbacks != null) {
+                            serviceCallbacks.setIsConnectedTextView(isConnected);
+                        }
                         break;
                     default:
                         Log.d(TAG, "I have no idea what the headset state is");
                         isConnected = false;
+                        if (serviceCallbacks != null) {
+                            serviceCallbacks.setIsConnectedTextView(isConnected);
+                        }
                 }
             }
         }
