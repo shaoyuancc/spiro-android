@@ -7,8 +7,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,6 +43,7 @@ public class SpfService extends Service {
     private boolean isCalibrating;
     private boolean isMeasuring;
     private boolean isStopped;
+    private boolean isConnected;
     private String lastRecordValue;
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
@@ -55,6 +58,9 @@ public class SpfService extends Service {
 
     private SharedPreferences preferences;
 
+    private static final String TAG = "AUDIOTAG";
+    private MusicIntentReceiver myReceiver;
+
     /**
      * Getters and setters
      */
@@ -64,12 +70,34 @@ public class SpfService extends Service {
     public boolean getIsStopped(){ return isStopped; }
     public String getLastRecordValue(){ return lastRecordValue; }
     public Double getIntensityThreshold(){ return intensityThreshold; }
+    public boolean getIsConnected() { return isConnected; }
 
     public void setIsCalibrated(Boolean input){ isCalibrated = input; }
     public void setIsCalibrating(Boolean input){ isCalibrating = input; }
     public void setIsMeasuring(Boolean input){ isMeasuring = input; }
     public void setIsStopped(Boolean input){ isStopped = input; }
     public void setLastRecordValue(String input){ lastRecordValue = input; }
+
+    private class MusicIntentReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", -1);
+                switch (state) {
+                    case 0:
+                        Log.d(TAG, "Headset is unplugged");
+                        isConnected = false;
+                        break;
+                    case 1:
+                        Log.d(TAG, "Headset is plugged");
+                        isConnected = true;
+                        break;
+                    default:
+                        Log.d(TAG, "I have no idea what the headset state is");
+                        isConnected = false;
+                }
+            }
+        }
+    }
 
     SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
@@ -118,6 +146,10 @@ public class SpfService extends Service {
         isMeasuring = false;
         isStopped = false;
         lastRecordValue = getString(R.string.empty_last_record_value);
+
+        myReceiver = new MusicIntentReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(myReceiver, filter);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             startMyOwnForeground();
@@ -179,6 +211,8 @@ public class SpfService extends Service {
     {
         Log.d(TAG_FOREGROUND_SERVICE, "Stop foreground service.");
 
+        unregisterReceiver(myReceiver);
+
         // Stop foreground service and remove the notification.
         stopForeground(true);
 
@@ -190,7 +224,7 @@ public class SpfService extends Service {
 
     public void startCalibration() {
         Log.d(TAG_FOREGROUND_SERVICE, "startCalibration Called");
-        /*
+        /*like
         String filename = DataOutput.generateFileName(".wav");
 
         MicrophoneSignalProcess.getInstance()
@@ -220,7 +254,7 @@ public class SpfService extends Service {
         MicrophoneSignalProcess.getInstance().debugStartContinuous(new SignalProcess.OnPeakFound() {
             @Override
             public void onResult(int flowRate, double magnitude) {
-                if (magnitude > intensityThreshold){
+                if (magnitude > intensityThreshold && isConnected){
                     Log.d(TAG_FOREGROUND_SERVICE,"Flow Rate: " + flowRate + " Magnitude: " + magnitude);
                     String data = DataOutput.createStringFromValue(flowRate);
                     DataOutput.writeFileExternalStorage(filename, data);

@@ -28,6 +28,12 @@
             android:name=".service.SpfService"
             android:enabled="true"
             android:exported="true" />
+
+        <receiver android:name=".feature.MusicIntentReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
